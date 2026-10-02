@@ -1,4 +1,5 @@
 /* Runs Python (Pyodide) in the background so a runaway loop can never freeze the page. */
+const VERSION = new URL(self.location.href).searchParams.get("v") || "1";
 importScripts("py/pyodide.js");
 
 let py = null;
@@ -16,7 +17,7 @@ function decode(text) {
 
 async function init() {
   // 1. problem bank first, so the page can show a problem while Python loads
-  const raw = await (await fetch("bank.dat")).text();
+  const raw = await (await fetch("bank.dat?v=" + VERSION, { cache: "no-cache" })).text();
   bank = decode(raw);
   for (const p of bank.problems) byId[p.id] = p;
   const pub = bank.problems.map((p) => ({
@@ -31,9 +32,9 @@ async function init() {
   py = await loadPyodide({ indexURL: "py/" });
   postMessage({ type: "status", text: "Loading NumPy and pandas…" });
   await py.loadPackage(["numpy", "pandas"]);
-  const csv = await (await fetch("CoffeeCart.csv")).text();
+  const csv = await (await fetch("CoffeeCart.csv?v=" + VERSION, { cache: "no-cache" })).text();
   py.FS.writeFile("CoffeeCart.csv", csv);
-  const src = await (await fetch("engine.py")).text();
+  const src = await (await fetch("engine.py?v=" + VERSION, { cache: "no-cache" })).text();
   py.FS.writeFile("engine.py", src);
   py.runPython("import sys; sys.path.insert(0, '.')\nimport engine");
   engine = py.pyimport("engine");

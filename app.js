@@ -13,6 +13,7 @@ const CONFIG = {
   CALL_TIMEOUT_MS: 25000,
 };
 const STORE_KEY = "om305-practice-v1";
+const APP_VERSION = "2026-10-02b";  // change this whenever files are updated so browsers grab the new ones
 
 // ------------------------------------------------------------------ state
 let PROBLEMS = [];
@@ -117,7 +118,7 @@ let workerTimer = null;
 
 function startWorker() {
   pyReady = false;
-  worker = new Worker("worker.js");
+  worker = new Worker("worker.js?v=" + APP_VERSION);
   worker.onmessage = (e) => {
     const m = e.data;
     if (m.type === "bank") onBank(m);
@@ -151,7 +152,7 @@ function startWorkerQuiet() {
   setPyStatus("Restarting Python…", false);
   const keepBank = PROBLEMS.length > 0;
   pyReady = false;
-  worker = new Worker("worker.js");
+  worker = new Worker("worker.js?v=" + APP_VERSION);
   worker.onmessage = (e) => {
     const m = e.data;
     if (m.type === "bank" && !keepBank) onBank(m);
