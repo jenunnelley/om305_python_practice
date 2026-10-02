@@ -3,7 +3,7 @@
 
 // ------------------------------------------------------------------ settings you can change
 const CONFIG = {
-  LOCK_PARTS: true,        // students must finish (or test out of) a part before the next one opens
+  LOCK_PARTS: false,        // students must finish (or test out of) a part before the next one opens
   TEST_OUT_STREAK: 2,      // first-try correct answers in a row needed to test out of a level
   MIN_LEVEL_SIZE: 3,       // levels smaller than this can't be tested out of
   STRUGGLE_FAILS: 3,       // wrong checks on one problem before the level turns off test-out
