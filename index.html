@@ -1,0 +1,55 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>OM 305 Python Practice</title>
+<link rel="icon" href="data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 32 32'%3E%3Crect width='32' height='32' rx='7' fill='%239E1B32'/%3E%3Ctext x='16' y='22' font-family='monospace' font-size='15' font-weight='700' fill='white' text-anchor='middle'%3Epy%3C/text%3E%3C/svg%3E">
+<link rel="stylesheet" href="style.css">
+</head>
+<body>
+<header class="topbar">
+  <button class="icon-btn menu-btn" id="menuBtn" aria-label="Show problem list">☰</button>
+  <div class="brand">
+    <span class="brand-mark">py</span>
+    <span class="brand-text">OM 305 Python Practice</span>
+  </div>
+  <div class="top-progress" id="topProgress" aria-live="polite"></div>
+  <button class="btn ghost small" id="reportBtn">My progress</button>
+</header>
+
+<div class="layout">
+  <nav class="sidebar" id="sidebar" aria-label="Parts and levels"></nav>
+
+  <main class="main" id="main">
+    <div class="loading-card" id="loadingCard">
+      <div class="spinner"></div>
+      <p>Loading problems…</p>
+    </div>
+  </main>
+</div>
+
+<div class="py-status" id="pyStatus" role="status">
+  <span class="dot"></span><span id="pyStatusText">Starting Python… (the first visit takes a little longer)</span>
+</div>
+
+<dialog id="reportDialog" class="dialog">
+  <form method="dialog" class="dialog-inner">
+    <h2>My progress</h2>
+    <label class="field">
+      <span>Your name (for the report)</span>
+      <input type="text" id="studentName" autocomplete="name" placeholder="First and last name">
+    </label>
+    <div id="reportBody"></div>
+    <div class="dialog-actions">
+      <button type="button" class="btn ghost danger" id="resetBtn">Start over</button>
+      <span class="spacer"></span>
+      <button type="button" class="btn ghost" id="copyReportBtn">Copy report</button>
+      <button class="btn">Close</button>
+    </div>
+  </form>
+</dialog>
+
+<script src="app.js"></script>
+</body>
+</html>

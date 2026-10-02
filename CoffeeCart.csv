@@ -1,0 +1,51 @@
+Week,Day,Drink,Cups,Revenue,Wasted,SoldOut
+1,Monday,Latte,36,189.0,1,0
+1,Monday,Mocha,25,137.5,7,0
+1,Monday,Drip Coffee,45,112.5,0,0
+1,Monday,Cold Brew,27,128.25,3,0
+1,Monday,Iced Tea,15,45.0,1,0
+1,Tuesday,Latte,35,183.75,7,0
+1,Tuesday,Mocha,21,115.5,5,0
+1,Tuesday,Drip Coffee,46,115.0,4,0
+1,Tuesday,Cold Brew,30,142.5,1,0
+1,Tuesday,Iced Tea,17,51.0,7,0
+1,Wednesday,Latte,42,220.5,2,0
+1,Wednesday,Mocha,26,143.0,0,0
+1,Wednesday,Drip Coffee,51,127.5,5,0
+1,Wednesday,Cold Brew,36,171.0,4,0
+1,Wednesday,Iced Tea,21,63.0,0,0
+1,Thursday,Latte,37,194.25,5,0
+1,Thursday,Mocha,21,115.5,0,0
+1,Thursday,Drip Coffee,41,102.5,5,0
+1,Thursday,Cold Brew,22,104.5,4,0
+1,Thursday,Iced Tea,18,54.0,5,0
+1,Friday,Latte,52,273.0,4,0
+1,Friday,Mocha,20,110.0,2,0
+1,Friday,Drip Coffee,59,147.5,4,0
+1,Friday,Cold Brew,37,175.75,1,1
+1,Friday,Iced Tea,26,78.0,2,1
+2,Monday,Latte,38,199.5,5,0
+2,Monday,Mocha,19,104.5,5,0
+2,Monday,Drip Coffee,51,127.5,7,0
+2,Monday,Cold Brew,39,185.25,4,0
+2,Monday,Iced Tea,19,57.0,1,0
+2,Tuesday,Latte,36,189.0,3,0
+2,Tuesday,Mocha,22,121.0,0,0
+2,Tuesday,Drip Coffee,42,105.0,0,0
+2,Tuesday,Cold Brew,29,137.75,1,0
+2,Tuesday,Iced Tea,12,36.0,3,0
+2,Wednesday,Latte,45,236.25,6,0
+2,Wednesday,Mocha,17,93.5,3,0
+2,Wednesday,Drip Coffee,43,107.5,2,0
+2,Wednesday,Cold Brew,37,175.75,2,1
+2,Wednesday,Iced Tea,24,72.0,0,1
+2,Thursday,Latte,36,189.0,5,0
+2,Thursday,Mocha,19,104.5,7,0
+2,Thursday,Drip Coffee,46,115.0,0,0
+2,Thursday,Cold Brew,32,152.0,7,0
+2,Thursday,Iced Tea,16,48.0,3,0
+2,Friday,Latte,43,225.75,6,0
+2,Friday,Mocha,28,154.0,1,1
+2,Friday,Drip Coffee,51,127.5,3,0
+2,Friday,Cold Brew,34,161.5,2,0
+2,Friday,Iced Tea,19,57.0,1,0
