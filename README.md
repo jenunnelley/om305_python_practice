@@ -27,6 +27,7 @@ A self-paced practice site for OM 305. Students write and run real Python (with 
 
 - **Six parts:** if statements, for loops, while loops, NumPy, pandas, and exam-style practice. That's 186 problems, broken into short levels that each add one new idea.
 - **Testing out:** a student who gets the first two problems in a level right on the first try, without hints, *tests out*. The rest of that level becomes optional and they move on.
+- **Jump ahead:** students can open any part. Inside a part, levels open in order, but a locked level offers a **jump-ahead challenge**. That's one problem from the level, with no hints, and they get one check. If they get it right, the level opens and the easier levels before it count as mastered. If they miss it, the level stays locked, and they have to solve another problem before they can try again with a different one.
 - **Extra practice when they struggle:** if a student misses a problem 3 times or uses 2 hints on it, that level turns off testing out, so they work through every problem in it. If they tested out of the level before, the tool suggests a quick refresher there.
 - **Exam-style practice (Part 6):** testing out is off here. Students do all nine questions, and printed output has to match the question's exact format.
 - **Answer checking:** the tool runs the student's actual code and compares the result to the right answer. It also re-runs their code with different values, so hard-coding an answer doesn't work. It recognizes common mistakes (wrong column, > vs >=, a missing filter) and explains them without giving the code.
@@ -41,7 +42,8 @@ Open `app.js` on GitHub, click the pencil icon to edit, and change the values ne
 
 | Setting | What it does | Default |
 |---|---|---|
-| `LOCK_PARTS` | Students must finish or test out of a part before the next part opens. Set to `false` to let them jump to any part. | `true` |
+| `LOCK_PARTS` | Set to `true` to make students finish or test out of a part before the next part opens | `false` |
+| `JUMP_AHEAD` | Locked levels offer a one-shot jump-ahead challenge. Set to `false` to turn it off. | `true` |
 | `TEST_OUT_STREAK` | How many first-try answers in a row it takes to test out of a level | `2` |
 | `STRUGGLE_FAILS` | Wrong answers on one problem before that level turns off testing out | `3` |
 | `STRUGGLE_HINTS` | Hints on one problem before that level turns off testing out | `2` |

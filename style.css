@@ -115,6 +115,7 @@ code { background: var(--surface-2); padding: 1px 5px; border-radius: 5px; font-
 .level .badge { margin-left: auto; font-size: 11px; color: var(--muted); white-space: nowrap; }
 .level .badge.mastered { color: var(--info); font-weight: 600; }
 .level .badge.done { color: var(--good); font-weight: 600; }
+.level .badge.jump { color: var(--accent); font-weight: 600; }
 .dots { display: flex; flex-wrap: wrap; gap: 3px; margin-top: 4px; }
 .dots i {
   width: 9px; height: 9px; border-radius: 3px; background: var(--surface-2); border: 1px solid var(--line);
@@ -250,6 +251,11 @@ table.df tbody th { color: var(--muted); font-weight: 500; }
 .hero p { margin: 0 0 12px; color: var(--muted); font-size: 15.5px; }
 .hero ul { margin: 0 0 16px; padding-left: 20px; }
 .hero li { margin: 4px 0; }
+.howto { background: var(--surface); border: 1px solid var(--line); border-left: 4px solid var(--accent); border-radius: 14px; padding: 20px 26px; margin-top: 16px; }
+.howto h2 { margin: 0 0 6px; font-size: 19px; }
+.howto p { margin: 0 0 10px; color: var(--muted); }
+.howto ol { margin: 0 0 10px; padding-left: 22px; }
+.howto li { margin: 6px 0; }
 .part-grid { display: grid; grid-template-columns: repeat(auto-fill, minmax(200px, 1fr)); gap: 12px; margin-top: 18px; }
 .part-card {
   text-align: left; border: 1px solid var(--line); background: var(--surface); color: var(--text);

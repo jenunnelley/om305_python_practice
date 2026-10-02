@@ -3,7 +3,8 @@
 
 // ------------------------------------------------------------------ settings you can change
 const CONFIG = {
-  LOCK_PARTS: false,        // students must finish (or test out of) a part before the next one opens
+  LOCK_PARTS: false,       // true = students must finish (or test out of) a part before the next one opens
+  JUMP_AHEAD: true,        // locked levels offer a one-shot "Jump ahead" challenge problem
   TEST_OUT_STREAK: 2,      // first-try correct answers in a row needed to test out of a level
   MIN_LEVEL_SIZE: 3,       // levels smaller than this can't be tested out of
   STRUGGLE_FAILS: 3,       // wrong checks on one problem before the level turns off test-out
@@ -61,7 +62,30 @@ function levelUnlocked(lv) {
   const part = partOf(lv.part);
   if (!partUnlocked(part)) return false;
   const i = part.levels.indexOf(lv);
-  return i === 0 || levelComplete(part.levels[i - 1]) || lv.ids.some((id) => state.probs[id] && (state.probs[id].status || state.probs[id].code));
+  return i === 0 || ls(lv.key).unlocked || levelComplete(part.levels[i - 1]) || lv.ids.some((id) => state.probs[id] && state.probs[id].status);
+}
+// a problem the student can use for a jump-ahead challenge (hardest first), or null
+function solvedCount() {
+  return Object.values(state.probs).filter((x) => x.status === "solved").length;
+}
+function jumpCandidate(lv) {
+  const lvs = ls(lv.key);
+  if (lvs.jumpWaitUntil != null && solvedCount() <= lvs.jumpWaitUntil) return null;
+  for (let k = lv.ids.length - 1; k >= 0; k--) {
+    const s = state.probs[lv.ids[k]];
+    if (!s || (!s.status && !s.jumpFailed && !s.fails && !s.hints)) return lv.ids[k];
+  }
+  return null;
+}
+function startJump(lv) {
+  const pid = jumpCandidate(lv);
+  if (!pid) {
+    alert("You've used your jump-ahead tries for this level. Work through the earlier levels to open it.");
+    return;
+  }
+  goto(pid);
+  view.jump = { pid, key: lv.key };
+  render();
 }
 function canTestOut(lv) {
   return !CONFIG.NO_TEST_OUT_PARTS.includes(lv.part) && lv.ids.length >= CONFIG.MIN_LEVEL_SIZE;
@@ -239,11 +263,15 @@ function renderSidebar() {
       const lvs = ls(lv.key);
       const open = levelUnlocked(lv);
       b.className = "level" + (view.pid && levelOf(view.pid) === lv ? " current" : "");
-      b.disabled = !open;
+      const partOpen = partUnlocked(part);
+      const jumpable = !open && partOpen && CONFIG.JUMP_AHEAD && jumpCandidate(lv);
+      b.disabled = !open && !jumpable;
+      if (jumpable) b.title = "Locked. Click to try a jump-ahead challenge.";
       const lc = counts(lv.ids);
       let badge = "";
       if (lvs.mastered) badge = '<span class="badge mastered">tested out</span>';
       else if (levelComplete(lv)) badge = '<span class="badge done">done</span>';
+      else if (jumpable) badge = '<span class="badge jump">🔒 jump ahead</span>';
       else if (!open) badge = '<span class="badge">🔒</span>';
       else badge = '<span class="badge">' + (lc.solved + lc.skipped) + "/" + lc.total + "</span>";
       b.innerHTML = '<span class="lname">' + esc(lv.name.replace(/^Level (\d+): /, "$1. ")) + badge + '</span><span class="dots"></span>';
@@ -260,6 +288,7 @@ function renderSidebar() {
         dots.appendChild(d);
       }
       b.onclick = () => {
+        if (!open) { if (jumpable) startJump(lv); return; }
         const first = lv.ids.find((id) => !isDone(id)) || lv.ids[0];
         goto(first);
       };
@@ -285,15 +314,29 @@ function renderWelcome(main) {
   main.innerHTML =
     '<section class="hero"><h1>Python Practice</h1>' +
     "<p>Practice everything from OM 305: if statements, loops, NumPy, and pandas. You write real Python right here in your browser. There's nothing to install.</p>" +
+    '<div class="notice good"><span class="icon">✅</span><div><b>This is just for practice.</b> Nothing you do here is graded, and it won\'t count toward or against your grade. ' +
+    "Mistakes are how you learn, so try things, get things wrong, and try again.</div></div>" +
     "<ul>" +
     "<li><b>It starts easy and gets harder.</b> Each level adds one new idea.</li>" +
     "<li><b>Get the first two in a level right on your first try</b>, without hints, and you test out. You can skip ahead to the next level.</li>" +
+    "<li><b>Already know it?</b> Click a locked level and take the <b>jump-ahead challenge</b>. Get that one problem right on your first try and you skip straight there.</li>" +
     "<li><b>Stuck?</b> Hints point you in the right direction without giving away the code.</li>" +
     "<li><b>Your progress saves in this browser,</b> so you can come back later on the same computer.</li>" +
     "</ul>" +
     '<div class="toolbar">' +
     (cont ? '<button class="btn" id="contBtn">Continue where you left off →</button>' : '<button class="btn" id="startBtn">Start with Part 1 →</button>') +
     "</div></section>" +
+    (CONFIG.JUMP_AHEAD ?
+    '<section class="howto"><h2>🚀 Already know some of this? Jump ahead.</h2>' +
+    "<p>You don't have to start at the beginning of every part. Levels inside a part are locked until you finish the ones before them, but you can test your way past them.</p>" +
+    "<ol>" +
+    "<li>In the list on the left, open a part and click any level marked <b>🔒 jump ahead</b>.</li>" +
+    "<li>You'll get <b>one challenge problem</b> from that level. Hints are off, but you can click <b>Run</b> as many times as you want to test your code.</li>" +
+    "<li>When you're ready, click <b>Check my answer</b>. <b>You only get one check</b>, so make sure your code works first.</li>" +
+    "<li><b>Got it right?</b> That level opens, and the easier levels before it count as mastered. Keep going from there.</li>" +
+    "<li><b>Missed it?</b> No problem. The level stays locked and you'll go back to the earlier levels. After you solve another problem, you can try jumping again with a different one.</li>" +
+    "</ol>" +
+    '<p class="small-note">Changed your mind? Click <b>Cancel challenge</b> before you check, and it won\'t count against you.</p></section>' : "") +
     '<div class="part-grid" id="partGrid"></div>';
   const grid = main.querySelector("#partGrid");
   for (const part of PARTS) {
@@ -302,7 +345,7 @@ function renderWelcome(main) {
     b.className = "part-card";
     b.disabled = !partUnlocked(part);
     b.innerHTML = '<span class="t">' + part.num + ". " + esc(part.title) + '</span><span class="s">' +
-      (b.disabled ? "🔒 Finish Part " + (part.num - 1) + " first" : (partComplete(part) ? "✓ Complete" : part.levels.length + " levels · " + c.total + " problems")) + "</span>";
+      (b.disabled ? "🔒 Finish Part " + (part.num - 1) + " first" : (partComplete(part) ? "✓ Complete" : part.levels.length + (part.levels.length === 1 ? " level · " : " levels · ") + c.total + " problems")) + "</span>";
     b.onclick = () => goto(nextInPart(part.num) || part.levels[0].ids[0]);
     grid.appendChild(b);
   }
@@ -336,11 +379,21 @@ function renderProblem(main) {
   const lvs = ls(lv.key);
   const optional = lvs.mastered && s.status !== "solved";
   const idx = lv.ids.indexOf(p.id) + 1;
+  const jumping = view.jump && view.jump.pid === p.id;
 
   let html = '<div class="crumbs"><span class="pill' + (optional ? " optional" : "") + '">' + esc(p.id) + "</span><span>Part " + p.part + ": " +
     esc(p.partTitle) + "</span><span>·</span><span>" + esc(p.level) + "</span><span>·</span><span>" + idx + " of " + lv.ids.length + "</span>" +
     (optional ? '<span class="pill optional">Optional: you tested out</span>' : "") +
     (s.status === "solved" ? '<span class="pill" style="background:var(--good-soft);color:var(--good)">✓ Solved</span>' : "") + "</div>";
+
+  if (jumping) {
+    html += '<div class="notice info"><span class="icon">🚀</span><div><b>Jump-ahead challenge: ' + esc(p.level) + "</b><br>" +
+      "Get this one right on your <b>first check</b> to unlock this level. The earlier levels in this part will count as mastered. " +
+      "Hints are off. You can run your code as many times as you want before you check.</div></div>";
+  } else if (!levelUnlocked(lv)) {
+    html += '<div class="notice warn"><span class="icon">🔒</span><div>This level is still locked. Work through the earlier levels to open it.' +
+      '<div class="actions"><button class="btn ghost small" id="backToOpen">Go to my next problem</button></div></div></div>';
+  }
 
   const intro = introFor(p);
   if (intro && (idx === 1 || /Level 5: A Bigger Dataset|Level 4: Adding Things Up|Level 10/.test(p.level))) html += '<div class="intro">' + md(intro) + "</div>";
@@ -376,10 +429,10 @@ function renderProblem(main) {
   html += '<div class="toolbar">' +
     '<button class="btn ghost" id="runBtn"' + (pyReady ? "" : " disabled") + ">▶ Run</button>" +
     '<button class="btn" id="checkBtn"' + (pyReady ? "" : " disabled") + ">Check my answer</button>" +
-    '<button class="btn ghost" id="hintBtn"' + (hintsLeft > 0 ? "" : " disabled") + ">💡 Hint" + (hintsLeft > 0 ? " (" + hintsLeft + " left)" : "") + "</button>" +
+    (jumping ? "" : '<button class="btn ghost" id="hintBtn"' + (hintsLeft > 0 ? "" : " disabled") + ">💡 Hint" + (hintsLeft > 0 ? " (" + hintsLeft + " left)" : "") + "</button>") +
     '<span class="spacer"></span>' +
     (pyReady ? '<span class="kbd">Ctrl + Enter runs your code</span>' : '<span class="kbd">Python is loading…</span>') +
-    '<button class="btn ghost small" id="skipBtn">' + (s.status === "solved" || optional ? "Next →" : "Skip for now →") + "</button>" +
+    '<button class="btn ghost small" id="skipBtn">' + (jumping ? "Cancel challenge" : (s.status === "solved" || optional ? "Next →" : "Skip for now →")) + "</button>" +
     "</div>";
 
   html += '<div id="outputArea"></div><div id="feedbackArea"></div><div class="hints" id="hintsArea"></div>';
@@ -397,8 +450,11 @@ function renderProblem(main) {
   main.querySelector("#resetCode").onclick = () => { ta.value = p.starter; s.code = p.starter; saveState(); syncGutter(ta); };
   main.querySelector("#runBtn").onclick = () => doRun();
   main.querySelector("#checkBtn").onclick = () => doCheck();
-  main.querySelector("#hintBtn").onclick = () => doHint();
-  main.querySelector("#skipBtn").onclick = () => doSkip();
+  const hbtn = main.querySelector("#hintBtn");
+  if (hbtn) hbtn.onclick = () => doHint();
+  main.querySelector("#skipBtn").onclick = () => (jumping ? cancelJump() : doSkip());
+  const bto = main.querySelector("#backToOpen");
+  if (bto) bto.onclick = () => goto(nextInPart(p.part) || PROBLEMS[0].id);
   const rf = main.querySelector("#refresher");
   if (rf) rf.onclick = () => { const prev = part.levels[li - 1]; goto(prev.ids.find((id) => !(state.probs[id] && state.probs[id].status)) || prev.ids[0]); };
   main.querySelectorAll("[data-peek]").forEach((b) => (b.onclick = () => doPeek(b.dataset.peek)));
@@ -550,6 +606,33 @@ async function doCheck() {
     view.feedback = { pass: false, msgs: ["Your code ran for too long, so we stopped it. This usually means a loop never ends."] };
   } else if (r.crash) {
     view.feedback = { pass: false, msgs: ["Something went wrong checking your code. Try running it first to see what happens."] };
+  } else if (view.jump && view.jump.pid === p.id && (r.status === "pass" || r.status === "fail")) {
+    const part = partOf(p.part);
+    const li = part.levels.indexOf(lv);
+    view.jump = null;
+    if (r.status === "pass") {
+      s.status = "solved";
+      s.firstTry = true;
+      lvs.unlocked = true;
+      lvs.streak = 1;
+      let skipped = 0;
+      for (let k = 0; k < li; k++) {
+        const prev = part.levels[k];
+        if (!levelComplete(prev)) { ls(prev.key).mastered = true; skipped++; }
+      }
+      saveState();
+      view.feedback = { pass: true, msgs: r.messages || [], solution: r.solution, jumped: true, jumpedOver: skipped };
+    } else {
+      s.fails++;
+      s.jumpFailed = true;
+      lvs.jumpWaitUntil = solvedCount();
+      saveState();
+      view.feedback = { pass: false, jumpFailed: true, msgs: r.messages && r.messages.length ? r.messages : ["Not quite yet."] };
+    }
+    renderSidebar();
+    renderTop();
+    render();
+    return;
   } else if (r.status === "pass") {
     const firstTry = s.fails === 0 && s.hints === 0 && s.status !== "solved";
     const wasSolved = s.status === "solved";
@@ -587,6 +670,8 @@ function showFeedback(f) {
     const p = BYID[view.pid];
     const cheers = ["Nice work!", "You got it!", "Correct!", "Nailed it!", "Great job!"];
     let h = '<div class="feedback pass"><h3>✅ ' + cheers[p.n % cheers.length] + "</h3>";
+    if (f.jumped) h += "<p><b>🚀 You jumped ahead!</b> " + esc(p.level.replace(/:.*/, "")) + " is now open" +
+      (f.jumpedOver ? ", and the earlier levels count as mastered" : "") + ". Keep going from here.</p>";
     if (f.testedOut) h += "<p><b>🚀 You tested out of this level!</b> You got " + CONFIG.TEST_OUT_STREAK + " in a row on your first try, so the rest of " + esc(p.level.replace(/:.*/, "")) + " is optional.</p>";
     if (f.msgs && f.msgs.length) h += "<p>" + f.msgs.map(esc).join("<br>") + "</p>";
     h += '<div class="actions"><button class="btn good" id="nextBtn">Next problem →</button>' +
@@ -600,7 +685,14 @@ function showFeedback(f) {
       sb.remove();
     };
   } else {
-    let h = '<div class="feedback fail"><h3>Not quite yet</h3><ul>' + f.msgs.map((m) => "<li>" + inline(esc(m)) + "</li>").join("") + "</ul>";
+    let h = '<div class="feedback fail"><h3>' + (f.jumpFailed ? "Not this time" : "Not quite yet") + '</h3><ul>' + f.msgs.map((m) => "<li>" + inline(esc(m)) + "</li>").join("") + "</ul>";
+    if (f.jumpFailed) {
+      h += "<p>No problem! This level stays locked for now. Work up through the earlier levels. After you solve another problem, you can try jumping ahead again with a different one.</p>" +
+        '<div class="actions"><button class="btn" id="jumpBack">Go to the earlier levels →</button></div></div>';
+      area.innerHTML = h;
+      document.getElementById("jumpBack").onclick = () => goto(nextInPart(BYID[view.pid].part) || PROBLEMS[0].id);
+      return;
+    }
     const p = BYID[view.pid];
     const s = ps(p.id);
     if (s.fails >= 2 && view.revealedHints < p.hints.length) h += '<div class="actions"><button class="btn ghost small" id="hint2">💡 Want a hint?</button></div>';
@@ -633,6 +725,12 @@ function renderHints() {
   const area = document.getElementById("hintsArea");
   if (!area) return;
   area.innerHTML = p.hints.slice(0, view.revealedHints).map((h, i) => '<div class="hint"><b>Hint ' + (i + 1) + ":</b> " + inline(esc(h)) + "</div>").join("");
+}
+
+function cancelJump() {
+  const p = BYID[view.pid];
+  view.jump = null;
+  goto(nextInPart(p.part) || PROBLEMS[0].id);
 }
 
 function doSkip() {
