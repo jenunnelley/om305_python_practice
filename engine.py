@@ -512,6 +512,22 @@ def check(p, code):
         res["messages"] += viol
         return res
 
+    for rc in p.get("requireCode", []):
+        if not re.search(rc["pattern"], code):
+            res["messages"].append(rc["msg"])
+            return res
+    if p.get("mustUse"):
+        try:
+            loads = {n.id for n in ast.walk(ast.parse(code)) if isinstance(n, ast.Name) and isinstance(n.ctx, ast.Load)}
+        except SyntaxError:
+            loads = None
+        if loads is not None:
+            for v in p["mustUse"]:
+                if v not in loads:
+                    res["messages"].append(f"Use the `{v}` variable in your code instead of typing in the values yourself. "
+                                           "That way your code still works if the data changes.")
+                    return res
+
     need = p.get("needLoop")
     if need == "for" and not has_node(code, (ast.For,)):
         res["messages"].append("This one should use a for loop.")
